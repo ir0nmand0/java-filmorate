@@ -19,7 +19,7 @@ class FilmorateApplicationTests {
 	@Autowired
 	private WebTestClient webTestClient;
 
-	private Long id = 0l;
+	private Long id = 0L;
 
 	private final User user = User.builder()
 			.id(++id)
@@ -53,7 +53,7 @@ class FilmorateApplicationTests {
 			.build();
 
 	private final User userUpdate = User.builder()
-			.id(1l)
+			.id(1L)
 			.login("doloreUpdate")
 			.name("est adipisicing")
 			.email("mail@yandex.ru")
@@ -111,7 +111,7 @@ class FilmorateApplicationTests {
 			.build();
 
 	private final Film filmUpdate = Film.builder()
-			.id(1l)
+			.id(1L)
 			.name("Властелин колец: Две крепости")
 			.description("Братство распалось, но Кольцо Всевластья должно быть уничтожено.")
 			.releaseDate(LocalDate.of(2003, 8, 03))
