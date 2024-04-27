@@ -24,13 +24,14 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Validated @RequestBody Film film) {
-        final boolean filmNameIsEmpty = films.values()
-                .stream()
-                .map(Film::getName)
-                .anyMatch(filmName -> filmName.trim().equalsIgnoreCase(film.getName().trim()));
-
-        if (filmNameIsEmpty) {
-            throw new ConditionsNotMetException("Фильм уже добавлен");
+        if (!dbIsEmpty()) {
+            films.values()
+                    .stream()
+                    .map(Film::getName)
+                    .filter(filmName -> filmName.replaceAll("\\s", "")
+                            .compareToIgnoreCase(film.getName().replaceAll("\\s", "")) != 0)
+                    .findFirst()
+                    .orElseThrow(() -> new ConditionsNotMetException("Фильм уже добавлен"));
         }
 
         film.searchByFreeId(films);
@@ -41,12 +42,20 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Validated @RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
+        if (idIsExist(film.getId())) {
             films.put(film.getId(), film);
             log.info(String.format("Фильм: %s обновлен в БД", film));
             return film;
         }
 
         throw new NotFoundException("Фильм с id = " + film.getId() + " не найден");
+    }
+
+    private boolean idIsExist(final long id) {
+        return films.containsKey(id);
+    }
+
+    private boolean dbIsEmpty() {
+        return films.isEmpty();
     }
 }

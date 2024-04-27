@@ -8,12 +8,12 @@ import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import java.io.IOException;
 import java.time.Duration;
 
-public class CustomDurationDeserializer extends StdDeserializer<Duration> {
-    public CustomDurationDeserializer() {
+public class FilmDurationDeserializer extends StdDeserializer<Duration> {
+    public FilmDurationDeserializer() {
         this(null);
     }
 
-    public CustomDurationDeserializer(Class<?> vc) {
+    public FilmDurationDeserializer(Class<?> vc) {
         super(vc);
     }
 

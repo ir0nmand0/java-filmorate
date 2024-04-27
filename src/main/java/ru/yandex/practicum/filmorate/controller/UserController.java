@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
@@ -24,13 +25,14 @@ public class UserController {
 
     @PostMapping
     public User create(@Validated @RequestBody User user) {
-        final boolean userNameIsEmpty = users.values()
-                .stream()
-                .map(User::getLogin)
-                .anyMatch(userName -> userName.trim().equalsIgnoreCase(user.getLogin().trim()));
-
-        if (userNameIsEmpty) {
-            throw new ConditionsNotMetException("Логин занят");
+        if (!dbIsEmpty()) {
+            users.values()
+                    .stream()
+                    .map(User::getLogin)
+                    .filter(userLogin -> userLogin.replaceAll("\\s", "")
+                            .compareToIgnoreCase(user.getLogin().replaceAll("\\s", "")) != 0)
+                    .findFirst()
+                    .orElseThrow(() -> new ConditionsNotMetException("Логин занят"));
         }
 
         user.searchByFreeId(users);
@@ -39,24 +41,22 @@ public class UserController {
         return user;
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(Long::longValue)
-                .max()
-                .orElse(0);
-
-        return ++currentMaxId;
-    }
-
     @PutMapping
     public User update(@Validated @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
+        if (idIsExist(user.getId())) {
             users.put(user.getId(), user);
             log.info(String.format("Пользователь: %s обновлен в БД", user));
             return user;
         }
 
         throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден");
+    }
+
+    private boolean idIsExist(final long id) {
+        return users.containsKey(id);
+    }
+
+    private boolean dbIsEmpty() {
+        return users.isEmpty();
     }
 }

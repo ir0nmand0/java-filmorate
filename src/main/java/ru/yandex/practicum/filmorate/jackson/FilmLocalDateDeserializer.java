@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-public class CustomLocalDateDeserializer extends StdDeserializer<LocalDate> {
-    public CustomLocalDateDeserializer() {
+public class FilmLocalDateDeserializer extends StdDeserializer<LocalDate> {
+    public FilmLocalDateDeserializer() {
         this(null);
     }
 
-    public CustomLocalDateDeserializer(Class<?> vc) {
+    public FilmLocalDateDeserializer(Class<?> vc) {
         super(vc);
     }
 

@@ -5,8 +5,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import ru.yandex.practicum.filmorate.jackson.CustomDurationDeserializer;
-import ru.yandex.practicum.filmorate.jackson.CustomLocalDateDeserializer;
+import ru.yandex.practicum.filmorate.jackson.FilmDurationDeserializer;
+import ru.yandex.practicum.filmorate.jackson.FilmLocalDateDeserializer;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -21,10 +21,10 @@ public class Film extends Id {
     private String name;
     @Size(min = 1, max = 200, message = "Минимальная длина описания фильма - 1 символ, а максимальная — 200")
     private String description;
-    @JsonDeserialize(using = CustomLocalDateDeserializer.class)
+    @JsonDeserialize(using = FilmLocalDateDeserializer.class)
     private LocalDate releaseDate;
     @Getter(AccessLevel.NONE)
-    @JsonDeserialize(using = CustomDurationDeserializer.class)
+    @JsonDeserialize(using = FilmDurationDeserializer.class)
     private Duration duration;
 
     public Long getDuration() {
