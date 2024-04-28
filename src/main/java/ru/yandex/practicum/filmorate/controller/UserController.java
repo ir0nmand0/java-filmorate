@@ -25,7 +25,7 @@ public class UserController {
 
     @PostMapping
     public User create(@Validated @RequestBody User user) {
-        if (!dbIsEmpty()) {
+        if (!users.isEmpty()) {
             users.values()
                     .stream()
                     .map(User::getLogin)
@@ -43,7 +43,7 @@ public class UserController {
 
     @PutMapping
     public User update(@Validated @RequestBody User user) {
-        if (idIsExist(user.getId())) {
+        if (isEmpty(user.getId())) {
             users.put(user.getId(), user);
             log.info(String.format("Пользователь: %s обновлен в БД", user));
             return user;
@@ -52,11 +52,7 @@ public class UserController {
         throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден");
     }
 
-    private boolean idIsExist(final long id) {
+    private boolean isEmpty(final long id) {
         return users.containsKey(id);
-    }
-
-    private boolean dbIsEmpty() {
-        return users.isEmpty();
     }
 }

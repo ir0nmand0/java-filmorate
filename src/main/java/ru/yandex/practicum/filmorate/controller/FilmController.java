@@ -24,7 +24,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Validated @RequestBody Film film) {
-        if (!dbIsEmpty()) {
+        if (!films.isEmpty()) {
             films.values()
                     .stream()
                     .map(Film::getName)
@@ -42,7 +42,7 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Validated @RequestBody Film film) {
-        if (idIsExist(film.getId())) {
+        if (isEmpty(film.getId())) {
             films.put(film.getId(), film);
             log.info(String.format("Фильм: %s обновлен в БД", film));
             return film;
@@ -51,11 +51,7 @@ public class FilmController {
         throw new NotFoundException("Фильм с id = " + film.getId() + " не найден");
     }
 
-    private boolean idIsExist(final long id) {
+    private boolean isEmpty(final long id) {
         return films.containsKey(id);
-    }
-
-    private boolean dbIsEmpty() {
-        return films.isEmpty();
     }
 }
