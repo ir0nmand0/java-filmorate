@@ -1,19 +1,23 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private final HashMap<Long, Set<Long>> userLikes = new HashMap<>();
     private final TreeMap<Integer, Set<Long>> numberOfLikes = new TreeMap<>(Collections.reverseOrder());
+    private final UserStorage userStorage;
 
     @Override
     public Collection<Film> findAll() {
@@ -44,8 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    @Override
-    public Film findOrElseThrow(final long id) {
+    private Film findOrElseThrow(final long id) {
         if (isEmptyInFilms(id)) {
             throw new NotFoundException("Фильм с id = " + id + " не найден");
         }
@@ -56,7 +59,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void addLike(final long id, final long userId) {
         findOrElseThrow(id);
-        findOrElseThrow(userId);
+        userStorage.findOrElseThrow(userId);
         ifEmptyThenPut(id);
         final int oldSize = getSize(id);
         ifEmptyThenPut(oldSize);
@@ -77,7 +80,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void removeLike(final long id, final long userId) {
         findOrElseThrow(id);
-        findOrElseThrow(userId);
+        userStorage.findOrElseThrow(userId);
         final int oldSize = getSize(id);
         ifEmptyThenPut(oldSize);
 
