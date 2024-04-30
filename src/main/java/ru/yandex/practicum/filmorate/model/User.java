@@ -15,9 +15,8 @@ import java.time.LocalDate;
 public class User extends Id {
     @Email
     private String email;
-    @NotEmpty
-    @NotBlank
-    @Pattern(regexp = "^\\w{5,30}$")
+    @NotNull
+    @Pattern(regexp = "^\\w{5,30}$", message = "Логин должен быть от 5 до 30 символов и без пробелов")
     private String login;
     @Getter(AccessLevel.NONE)
     private String name;

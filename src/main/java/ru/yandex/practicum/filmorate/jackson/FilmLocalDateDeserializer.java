@@ -20,9 +20,9 @@ public class FilmLocalDateDeserializer extends StdDeserializer<LocalDate> {
 
     @Override
     public LocalDate deserialize(JsonParser jsonParser, DeserializationContext context) throws IOException {
-        String date = jsonParser.getText();
+        final String date = jsonParser.getText();
         try {
-            LocalDate releaseDate = LocalDate.parse(date);
+            final LocalDate releaseDate = LocalDate.parse(date);
 
             if (releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
                 throw new ConditionsNotMetException("Дата релиза фильма должна быть после 28.12.1895");

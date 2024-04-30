@@ -1,58 +1,53 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
-
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-@Slf4j
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserStorage userStorage;
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-        return users.values();
+        return userStorage.findAll();
+    }
+
+    @GetMapping(value = "/{id}/friends")
+    public Collection<User> findAllFriends(@PathVariable final long id) {
+        return userService.findAllFriends(id);
+    }
+
+    @GetMapping(value = "/{id}/friends/common/{friendId}")
+    public Collection<User> findAllFriends(@PathVariable final long id, @PathVariable final long friendId) {
+        return userService.findAllFriends(id, friendId);
     }
 
     @PostMapping
-    public User create(@Validated @RequestBody User user) {
-        if (!users.isEmpty()) {
-            users.values()
-                    .stream()
-                    .map(User::getLogin)
-                    .filter(userLogin -> userLogin.replaceAll("\\s", "")
-                            .compareToIgnoreCase(user.getLogin().replaceAll("\\s", "")) != 0)
-                    .findFirst()
-                    .orElseThrow(() -> new ConditionsNotMetException("Логин занят"));
-        }
-
-        user.searchByFreeId(users);
-        users.put(user.getId(), user);
-        log.info(String.format("Пользователь: %s добавлен в БД", user));
-        return user;
+    public User create(@Validated @RequestBody final User user) {
+        return userStorage.create(user);
     }
 
     @PutMapping
-    public User update(@Validated @RequestBody User user) {
-        if (isEmpty(user.getId())) {
-            users.put(user.getId(), user);
-            log.info(String.format("Пользователь: %s обновлен в БД", user));
-            return user;
-        }
-
-        throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден");
+    public User update(@Validated @RequestBody final User user) {
+        return userStorage.update(user);
     }
 
-    private boolean isEmpty(final long id) {
-        return users.containsKey(id);
+    @PutMapping(value = "/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable final long id, @PathVariable final long friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping (value = "/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable final long id, @PathVariable final long friendId) {
+        userService.removeFriend(id, friendId);
     }
 }

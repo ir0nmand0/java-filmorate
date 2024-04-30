@@ -15,7 +15,6 @@ import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FilmorateApplicationTests {
-
 	@Autowired
 	private WebTestClient webTestClient;
 
@@ -69,7 +68,6 @@ class FilmorateApplicationTests {
 			.build();
 
 	private final Film film = Film.builder()
-			.id(++id)
 			.name("nisi eiusmod")
 			.description("adipisicing")
 			.releaseDate(LocalDate.of(1967, 3, 25))
