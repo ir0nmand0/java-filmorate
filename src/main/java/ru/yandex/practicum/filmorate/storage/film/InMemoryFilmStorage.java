@@ -122,11 +122,11 @@ public class InMemoryFilmStorage implements FilmStorage {
             numberOfLikes.put(id, new HashSet<>());
         }
     }
-    
+
     private boolean isEmptyInNumberOfLikes(final int id) {
         return !numberOfLikes.containsKey(id);
     }
-    
+
     private boolean isEmptyInUserLikes(final long id) {
         return !userLikes.containsKey(id);
     }
