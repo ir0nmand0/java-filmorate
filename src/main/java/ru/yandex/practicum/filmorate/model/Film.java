@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import ru.yandex.practicum.filmorate.jackson.FilmDurationDeserializer;
 import ru.yandex.practicum.filmorate.jackson.FilmLocalDateDeserializer;
@@ -12,10 +11,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
+@Builder
 @Jacksonized
-@SuperBuilder
-public class Film extends Id {
+public class Film {
+    private Long id;
     // https://www.kinopoisk.ru/media/article/4006428/
     @Size(min = 1, max = 100, message = "Минимальная длина имени фильма - 1 символ, а максимальная — 100")
     private String name;
