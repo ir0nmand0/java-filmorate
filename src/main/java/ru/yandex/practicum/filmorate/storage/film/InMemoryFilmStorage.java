@@ -97,14 +97,14 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAllLike(final int count) {
-        List<Film> films = new ArrayList<>();
+        List<Film> popular = new ArrayList<>();
 
         numberOfLikes.entrySet().stream()
                 .limit(count)
                 .forEach(integerSetEntry -> integerSetEntry.getValue()
-                        .forEach(id -> films.add(findOrElseThrow(id))));
+                        .forEach(id -> popular.add(findOrElseThrow(id))));
 
-        return films;
+        return popular;
     }
 
     private void ifEmptyThenPut(final long id) {

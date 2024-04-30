@@ -13,9 +13,9 @@ public interface FilmStorage {
 
     Film findOrElseThrow(final long id);
 
-    void addLike(long id, long userId);
+    void addLike(final long id, final long userId);
 
-    void removeLike(long id, long userId);
+    void removeLike(final long id, final long userId);
 
-    Collection<Film> findAllLike(int count);
+    Collection<Film> findAllLike(final int count);
 }
