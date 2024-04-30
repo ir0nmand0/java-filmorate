@@ -21,7 +21,6 @@ class FilmorateApplicationTests {
 	private Long id = 0L;
 
 	private final User user = User.builder()
-			.id(++id)
 			.login("dolore")
 			.name("Nick Name")
 			.email("mail@mail.ru")
