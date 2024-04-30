@@ -74,7 +74,7 @@ public class InMemoryFilmService implements FilmService {
     }
 
     private void ifEmptyThenPut(final long id) {
-        if(!userLikes.containsKey(id)) {
+        if (!userLikes.containsKey(id)) {
             userLikes.put(id, new HashSet<>());
         }
     }
@@ -84,7 +84,7 @@ public class InMemoryFilmService implements FilmService {
     }
 
     private void ifEmptyThenPut(final int id) {
-        if(!numberOfLikes.containsKey(id)) {
+        if (!numberOfLikes.containsKey(id)) {
             numberOfLikes.put(id, new HashSet<>());
         }
     }
