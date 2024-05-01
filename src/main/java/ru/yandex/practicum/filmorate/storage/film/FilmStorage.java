@@ -11,9 +11,23 @@ public interface FilmStorage {
 
     Film update(final Film film);
 
-    void addLike(final long id, final long userId);
-
-    void removeLike(final long id, final long userId);
+    Film findOrElseThrow(final long id);
 
     Collection<Film> findAllLike(final int count);
+
+    void ifEmptyThenPutInUserLikes(final long id);
+
+    int getSizeUserLikes(final long id);
+
+    void addLikeInUserLikesOrElseThrow(final long id, final long userId);
+
+    void addLikeInNumberOfLikesOrElseThrow(final int size, final long id, final long userId);
+
+    void transferLikesInInNumberOfLikes(final int size, final int oldSize);
+
+    void removeLikeFromNumberOfLikes(final int size, final long id);
+
+    void removeLikeFromUserLikesOrElseThrow(long id, long userId);
+
+    void ifEmptyThenPutInNumberOfLikes(int id);
 }

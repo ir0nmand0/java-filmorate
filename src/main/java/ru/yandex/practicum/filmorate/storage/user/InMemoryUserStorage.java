@@ -31,7 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
 
         user.setId(searchByFreeId());
-        users.put(user.getId(), user);
+        putUser(user);
         log.info(String.format("Пользователь: %s добавлен в БД", user));
         return user;
     }
@@ -39,7 +39,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User user) {
         findOrElseThrow(user.getId());
-        users.put(user.getId(), user);
+        putUser(user);
         log.info(String.format("Пользователь: %s обновлен в БД", user));
         return user;
     }
@@ -51,32 +51,6 @@ public class InMemoryUserStorage implements UserStorage {
         }
 
         return users.get(id);
-    }
-
-    @Override
-    public void addFriend(final long id, final long friendId) {
-        ifEmptyThenPut(id);
-        ifEmptyThenPut(friendId);
-
-        if (friends.get(id).add(friendId) && friends.get(friendId).add(id)) {
-            log.info(String.format("Пользователь с id = %d, добавлен в друзья к id = %d", friendId, id));
-            return;
-        }
-
-        throw new ConditionsNotMetException("Пользователи уже друзья");
-    }
-
-    @Override
-    public void removeFriend(final long id, final long friendId) {
-        ifEmptyThenPut(id);
-        ifEmptyThenPut(friendId);
-
-        if (friends.get(id).remove(friendId) && friends.get(friendId).remove(id)) {
-            log.info(String.format("Пользователь с id = %d, удален из друзей id = %d", friendId, id));
-            return;
-        }
-
-        throw new PostmanNotFriendRemoveException("Пользователи не друзья");
     }
 
     @Override
@@ -97,7 +71,40 @@ public class InMemoryUserStorage implements UserStorage {
                 .toList();
     }
 
-    private void ifEmptyThenPut(final long id) {
+    private void putUser(final User user) {
+        users.put(user.getId(), user);
+    }
+
+    @Override
+    public void putFriendOrElseThrow(final long id, final long friendId) {
+        if (putFriend(id, friendId) && putFriend(friendId, id)) {
+            log.info(String.format("Пользователь с id = %d, добавлен в друзья к id = %d", friendId, id));
+            return;
+        }
+
+        throw new ConditionsNotMetException("Пользователи уже друзья");
+    }
+
+    @Override
+    public void removeFriendOrElseThrow(final long id, final long friendId) {
+        if (deleteFriend(id, friendId) && deleteFriend(friendId, id)) {
+            log.info(String.format("Пользователь с id = %d, удален из друзей id = %d", friendId, id));
+            return;
+        }
+
+        throw new PostmanNotFriendRemoveException("Пользователи не друзья");
+    }
+
+    private boolean putFriend(final long id, final long friendId) {
+        return friends.get(id).add(friendId);
+    }
+
+    private boolean deleteFriend(final long id, final long friendId) {
+        return friends.get(id).remove(friendId);
+    }
+
+    @Override
+    public void ifEmptyThenPut(final long id) {
         findOrElseThrow(id);
 
         if (isEmptyInFriends(id)) {
@@ -113,7 +120,8 @@ public class InMemoryUserStorage implements UserStorage {
         return !friends.containsKey(id);
     }
 
-    private boolean isDuplicated(final User user) {
+    @Override
+    public boolean isDuplicated(final User user) {
         return users.values()
                 .stream()
                 .map(User::getLogin)
