@@ -19,7 +19,7 @@ public class FilmDurationDeserializer extends StdDeserializer<Duration> {
 
     @Override
     public Duration deserialize(JsonParser jsonParser, DeserializationContext context) throws IOException {
-        Long durationMinutes = jsonParser.getLongValue();
+        final long durationMinutes = jsonParser.getLongValue();
 
         if (durationMinutes <= 0) {
             throw new ConditionsNotMetException("Продолжительность фильма должна быть больше 0");

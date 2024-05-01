@@ -2,22 +2,20 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
+@Builder
 @Jacksonized
-@SuperBuilder
-public class User extends Id {
+public class User {
+    private Long id;
     @Email
     private String email;
-    @NotEmpty
-    @NotBlank
-    @Pattern(regexp = "^\\w{5,30}$")
+    @NotNull
+    @Pattern(regexp = "^\\w{5,30}$", message = "Логин должен быть от 5 до 30 символов и без пробелов")
     private String login;
     @Getter(AccessLevel.NONE)
     private String name;

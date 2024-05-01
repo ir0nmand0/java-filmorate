@@ -15,14 +15,12 @@ import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FilmorateApplicationTests {
-
 	@Autowired
 	private WebTestClient webTestClient;
 
 	private Long id = 0L;
 
 	private final User user = User.builder()
-			.id(++id)
 			.login("dolore")
 			.name("Nick Name")
 			.email("mail@mail.ru")
@@ -69,7 +67,6 @@ class FilmorateApplicationTests {
 			.build();
 
 	private final Film film = Film.builder()
-			.id(++id)
 			.name("nisi eiusmod")
 			.description("adipisicing")
 			.releaseDate(LocalDate.of(1967, 3, 25))
