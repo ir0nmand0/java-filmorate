@@ -4,12 +4,12 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.jackson.Jacksonized;
 import org.springframework.util.ObjectUtils;
-
 import java.time.LocalDate;
 
 @Data
 @Builder
 @Jacksonized
+@EqualsAndHashCode(of = {"email"})
 public class User {
     private Long id;
     @Email
@@ -24,5 +24,9 @@ public class User {
 
     public String getName() {
         return ObjectUtils.isEmpty(name) ? login : name;
+    }
+
+    public String getRealName() {
+        return name;
     }
 }

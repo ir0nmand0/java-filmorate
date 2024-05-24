@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.user;
+
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserStorage {
     Collection<User> findAll();
@@ -14,13 +16,13 @@ public interface UserStorage {
 
     Collection<User> findAllFriends(final long id);
 
-    Collection<User> findAllFriends(final long id, final long friendId);
+    Collection<User> findAllCommonFriends(final long id, final long friendId);
 
-    void putFriendOrElseThrow(final long id, final long friendId);
+    void addFriendOrElseThrow(final long id, final long friendId);
 
     void removeFriendOrElseThrow(final long id, final long friendId);
 
-    void ifEmptyThenPut(final long id);
+    Optional<User> getUser(final long id);
 
-    boolean isDuplicated(final User user);
+    boolean isDuplicateEmail(final User user);
 }

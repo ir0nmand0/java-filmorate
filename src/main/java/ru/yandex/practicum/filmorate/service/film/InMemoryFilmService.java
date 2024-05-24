@@ -18,27 +18,14 @@ public class InMemoryFilmService implements FilmService {
     public void addLike(final long id, final long userId) {
         filmStorage.findOrElseThrow(id);
         userStorage.findOrElseThrow(userId);
-        filmStorage.ifEmptyThenPutInUserLikes(id);
-        final int oldSize = filmStorage.getSizeUserLikes(id);
-        filmStorage.ifEmptyThenPutInNumberOfLikes(oldSize);
-        filmStorage.addLikeInUserLikesOrElseThrow(id, userId);
-        filmStorage.removeLikeFromNumberOfLikes(oldSize, id);
-        final int size = filmStorage.getSizeUserLikes(id);
-        filmStorage.ifEmptyThenPutInNumberOfLikes(size);
-        filmStorage.addLikeInNumberOfLikesOrElseThrow(size, id, userId);
+        filmStorage.addLikeInFavoriteFilmsOrElseThrow(id, userId);
     }
 
     @Override
     public void removeLike(final long id, final long userId) {
         filmStorage.findOrElseThrow(id);
         userStorage.findOrElseThrow(userId);
-        final int oldSize = filmStorage.getSizeUserLikes(id);
-        filmStorage.ifEmptyThenPutInNumberOfLikes(oldSize);
-        filmStorage.removeLikeFromUserLikesOrElseThrow(id, userId);
-        filmStorage.removeLikeFromNumberOfLikes(oldSize, id);
-        final int size = filmStorage.getSizeUserLikes(id);
-        filmStorage.ifEmptyThenPutInNumberOfLikes(size);
-        filmStorage.transferLikesInInNumberOfLikes(size, oldSize);
+        filmStorage.removeLikeFromFavoriteFilmsOrElseThrow(id, userId);
     }
 
     @Override

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -43,11 +44,19 @@ public class UserController {
 
     @PutMapping(value = "/{id}/friends/{friendId}")
     public void addFriend(@PathVariable final long id, @PathVariable final long friendId) {
+        isUnique(id, friendId);
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping (value = "/{id}/friends/{friendId}")
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
     public void removeFriend(@PathVariable final long id, @PathVariable final long friendId) {
+        isUnique(id, friendId);
         userService.removeFriend(id, friendId);
+    }
+
+    private void isUnique(final long id, final long friendId) {
+        if (id == friendId) {
+            throw new ConditionsNotMetException("Пользователь не может отправить самому себе запрос");
+        }
     }
 }

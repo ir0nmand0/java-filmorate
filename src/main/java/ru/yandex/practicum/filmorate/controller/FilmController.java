@@ -26,6 +26,11 @@ public class FilmController {
         return filmService.findAllLike(count);
     }
 
+    @GetMapping(value = "/{id}")
+    public Film find(@PathVariable final long id) {
+        return filmStorage.findOrElseThrow(id);
+    }
+
     @PostMapping
     public Film create(@Validated @RequestBody final Film film) {
         return filmStorage.create(film);

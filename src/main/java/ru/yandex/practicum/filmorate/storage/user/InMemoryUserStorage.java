@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.PostmanNotFriendRemoveException;
@@ -22,8 +23,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(final User user) {
-        if (isDuplicated(user)) {
-            throw new ConditionsNotMetException("Логин занят");
+        if (isDuplicateEmail(user)) {
+            throw new ConditionsNotMetException("Email занят");
         }
 
         if (Objects.nonNull(user.getId())) {
@@ -32,25 +33,25 @@ public class InMemoryUserStorage implements UserStorage {
 
         user.setId(searchByFreeId());
         putUser(user);
-        log.info(String.format("Пользователь: %s добавлен в БД", user));
+        log.info("Пользователь: {} добавлен в БД", user);
         return user;
     }
 
     @Override
-    public User update(User user) {
+    public User update(final User user) {
+        if (ObjectUtils.isEmpty(user.getId())) {
+            throw new ConditionsNotMetException("Для обновления информации необходимо указать id");
+        }
+
         findOrElseThrow(user.getId());
         putUser(user);
-        log.info(String.format("Пользователь: %s обновлен в БД", user));
+        log.info("Пользователь: {} обновлен в БД", user);
         return user;
     }
 
     @Override
     public User findOrElseThrow(final long id) {
-        if (isEmptyInUsers(id)) {
-            throw new NotFoundException("Пользователь с id = " + id + " не найден");
-        }
-
-        return users.get(id);
+        return getUser(id).orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
     }
 
     @Override
@@ -62,7 +63,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> findAllFriends(final long id, final long friendId) {
+    public Collection<User> findAllCommonFriends(final long id, final long friendId) {
         ifEmptyThenPut(id);
         ifEmptyThenPut(friendId);
         return friends.get(id).stream()
@@ -76,9 +77,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void putFriendOrElseThrow(final long id, final long friendId) {
+    public void addFriendOrElseThrow(final long id, final long friendId) {
+        ifEmptyThenPut(id);
+        ifEmptyThenPut(friendId);
         if (putFriend(id, friendId) && putFriend(friendId, id)) {
-            log.info(String.format("Пользователь с id = %d, добавлен в друзья к id = %d", friendId, id));
+            log.info("Пользователь с id = {}, добавлен в друзья к id = {}", friendId, id);
             return;
         }
 
@@ -87,8 +90,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void removeFriendOrElseThrow(final long id, final long friendId) {
+        ifEmptyThenPut(id);
+        ifEmptyThenPut(friendId);
         if (deleteFriend(id, friendId) && deleteFriend(friendId, id)) {
-            log.info(String.format("Пользователь с id = %d, удален из друзей id = %d", friendId, id));
+            log.info("Пользователь с id = {}, удален из друзей id = {}", friendId, id);
             return;
         }
 
@@ -103,8 +108,7 @@ public class InMemoryUserStorage implements UserStorage {
         return friends.get(id).remove(friendId);
     }
 
-    @Override
-    public void ifEmptyThenPut(final long id) {
+    private void ifEmptyThenPut(final long id) {
         findOrElseThrow(id);
 
         if (isEmptyInFriends(id)) {
@@ -112,8 +116,9 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private boolean isEmptyInUsers(final long id) {
-        return !users.containsKey(id);
+    @Override
+    public Optional<User> getUser(final long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     private boolean isEmptyInFriends(final long id) {
@@ -121,12 +126,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean isDuplicated(final User user) {
+    public boolean isDuplicateEmail(final User user) {
         return users.values()
                 .stream()
-                .map(User::getLogin)
-                .anyMatch(userLogin -> userLogin.replaceAll("\\s", "")
-                        .compareToIgnoreCase(user.getLogin().replaceAll("\\s", "")) == 0);
+                .map(User::getEmail)
+                .anyMatch(userEmail -> userEmail.replaceAll("\\s", "")
+                        .compareToIgnoreCase(user.getEmail().replaceAll("\\s", "")) == 0);
     }
 
     private long searchByFreeId() {
@@ -139,6 +144,6 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ConditionsNotMetException("Недопустимый формат Id пользователя = " + currentMaxId);
         }
 
-        return  ++currentMaxId;
+        return ++currentMaxId;
     }
 }

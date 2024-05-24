@@ -14,15 +14,11 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public void addFriend(final long id, final long friendId) {
-        userStorage.ifEmptyThenPut(id);
-        userStorage.ifEmptyThenPut(friendId);
-        userStorage.putFriendOrElseThrow(id, friendId);
+        userStorage.addFriendOrElseThrow(id, friendId);
     }
 
     @Override
     public void removeFriend(final long id, final long friendId) {
-        userStorage.ifEmptyThenPut(id);
-        userStorage.ifEmptyThenPut(friendId);
         userStorage.removeFriendOrElseThrow(id, friendId);
     }
 
@@ -33,6 +29,6 @@ public class InMemoryUserService implements UserService {
 
     @Override
     public Collection<User> findAllFriends(final long id, final long friendId) {
-        return userStorage.findAllFriends(id, friendId);
+        return userStorage.findAllCommonFriends(id, friendId);
     }
 }

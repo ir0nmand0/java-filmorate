@@ -10,42 +10,36 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.PostmanNotFriendRemoveException;
-
-import java.util.Map;
+import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handle(final ConditionsNotMetException e) {
-        log.warn(e.getMessage());
-        return Map.of("error", e.getMessage());
+    public ErrorResponse handle(final ConditionsNotMetException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> handle(final PostmanNotFriendRemoveException e) {
-        log.warn(e.getMessage());
-        return Map.of("error", e.getMessage());
+    public ErrorResponse handle(final PostmanNotFriendRemoveException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handle(final MethodArgumentNotValidException e) {
+    public ErrorResponse handle(final MethodArgumentNotValidException e) {
         if (ObjectUtils.isEmpty(e.getBindingResult().getAllErrors().getFirst().getDefaultMessage())) {
-            log.warn("Валидация не пройдена");
-            return Map.of("error", "Валидация не пройдена");
+            return new ErrorResponse("Валидация не пройдена");
         }
 
-        log.warn(e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
-        return Map.of("error", e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
+        return new ErrorResponse(e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handle(final NotFoundException e) {
-        log.warn(e.getMessage());
-        return Map.of("error", e.getMessage());
+    public ErrorResponse handle(final NotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }

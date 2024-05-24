@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface FilmStorage {
     Collection<Film> findAll();
@@ -13,21 +14,13 @@ public interface FilmStorage {
 
     Film findOrElseThrow(final long id);
 
+    Optional<Film> getFilm(final long id);
+
     Collection<Film> findAllLike(final int count);
 
-    void ifEmptyThenPutInUserLikes(final long id);
+    void addLikeInFavoriteFilmsOrElseThrow(final long id, final long userId);
 
-    int getSizeUserLikes(final long id);
+    void removeLikeFromFavoriteFilmsOrElseThrow(long id, long userId);
 
-    void addLikeInUserLikesOrElseThrow(final long id, final long userId);
-
-    void addLikeInNumberOfLikesOrElseThrow(final int size, final long id, final long userId);
-
-    void transferLikesInInNumberOfLikes(final int size, final int oldSize);
-
-    void removeLikeFromNumberOfLikes(final int size, final long id);
-
-    void removeLikeFromUserLikesOrElseThrow(long id, long userId);
-
-    void ifEmptyThenPutInNumberOfLikes(int id);
+    boolean isDuplicatedName(final Film film);
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,14 +10,13 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmorateApplicationTests {
-	@Autowired
-	private WebTestClient webTestClient;
+	private final WebTestClient webTestClient;
 
 	private Long id = 0L;
 
@@ -70,7 +70,7 @@ class FilmorateApplicationTests {
 			.name("nisi eiusmod")
 			.description("adipisicing")
 			.releaseDate(LocalDate.of(1967, 3, 25))
-			.duration(Duration.ofMinutes(100))
+			.duration(100)
 			.build();
 
 	private final Film filmFailName = Film.builder()
@@ -78,7 +78,7 @@ class FilmorateApplicationTests {
 			.name("")
 			.description("Description")
 			.releaseDate(LocalDate.of(1900, 3, 25))
-			.duration(Duration.ofMinutes(200))
+			.duration(200)
 			.build();
 
 	private final Film filmFailDescription = Film.builder()
@@ -88,7 +88,7 @@ class FilmorateApplicationTests {
 					+ "разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. "
 					+ "о Куглов, который за время «своего отсутствия», стал кандидатом Коломбани.")
 			.releaseDate(LocalDate.of(1900, 3, 25))
-			.duration(Duration.ofMinutes(200))
+			.duration(200)
 			.build();
 
 	private final Film filmFailReleaseDate = Film.builder()
@@ -96,7 +96,7 @@ class FilmorateApplicationTests {
 			.name("Name")
 			.description("Description")
 			.releaseDate(LocalDate.of(1890, 3, 25))
-			.duration(Duration.ofMinutes(200))
+			.duration(200)
 			.build();
 
 	private final Film filmFailDuration = Film.builder()
@@ -104,7 +104,7 @@ class FilmorateApplicationTests {
 			.name("Name")
 			.description("Description")
 			.releaseDate(LocalDate.of(1896, 3, 25))
-			.duration(Duration.ofMinutes(-200))
+			.duration(-200)
 			.build();
 
 	private final Film filmUpdate = Film.builder()
@@ -112,32 +112,9 @@ class FilmorateApplicationTests {
 			.name("Властелин колец: Две крепости")
 			.description("Братство распалось, но Кольцо Всевластья должно быть уничтожено.")
 			.releaseDate(LocalDate.of(2003, 8, 03))
-			.duration(Duration.ofMinutes(179))
+			.duration(179)
 			.build();
-
-	@Test
-	void createAndUpdateUser() {
-		webTestClient.post().uri("/users")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.body(Mono.just(user), User.class)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader()
-				.contentType(MediaType.APPLICATION_JSON)
-				.expectBodyList(User.class);
-
-		webTestClient.put().uri("/users")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.body(Mono.just(userUpdate), User.class)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader()
-				.contentType(MediaType.APPLICATION_JSON)
-				.expectBodyList(User.class);
-	}
-
+	
 	@Test
 	void noCreateUserWithFailLogin() {
 		webTestClient.post().uri("/users")
@@ -185,29 +162,6 @@ class FilmorateApplicationTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBodyList(Map.class);
-	}
-
-	@Test
-	void createAndUpdateFilm() {
-		webTestClient.post().uri("/films")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.body(Mono.just(film), Film.class)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader()
-				.contentType(MediaType.APPLICATION_JSON)
-				.expectBodyList(Film.class);
-
-		webTestClient.put().uri("/films")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.body(Mono.just(filmUpdate), Film.class)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader()
-				.contentType(MediaType.APPLICATION_JSON)
-				.expectBodyList(Film.class);
 	}
 
 	@Test

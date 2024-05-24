@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,8 +13,8 @@ import java.util.*;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
-    private final HashMap<Long, Set<Long>> userLikes = new HashMap<>();
-    private final TreeMap<Integer, Set<Long>> numberOfLikes = new TreeMap<>(Collections.reverseOrder());
+    private final HashMap<Long, Set<Long>> favoriteFilms = new HashMap<>();
+    private final TreeMap<Integer, Set<Long>> numberLikes = new TreeMap<>(Collections.reverseOrder());
 
     @Override
     public Collection<Film> findAll() {
@@ -22,7 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film create(final Film film) {
-        if (isDuplicated(film)) {
+        if (isDuplicatedName(film)) {
             throw new ConditionsNotMetException("Фильм уже добавлен");
         }
 
@@ -32,32 +33,37 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         film.setId(searchByFreeId());
         films.put(film.getId(), film);
-        log.info(String.format("Фильм: %s добавлен в БД", film));
+        log.info("Фильм: {} добавлен в БД", film);
         return film;
     }
 
     @Override
     public Film update(final Film film) {
+        if (ObjectUtils.isEmpty(film.getId())) {
+            throw new ConditionsNotMetException("Для обновления информации необходимо указать id");
+        }
+
         findOrElseThrow(film.getId());
         films.put(film.getId(), film);
-        log.info(String.format("Фильм: %s обновлен в БД", film));
+        log.info("Фильм: {} обновлен в БД", film);
         return film;
     }
 
     @Override
     public Film findOrElseThrow(final long id) {
-        if (isEmptyInFilms(id)) {
-            throw new NotFoundException("Фильм с id = " + id + " не найден");
-        }
+        return getFilm(id).orElseThrow(() -> new NotFoundException("Фильм с id = " + id + " не найден"));
+    }
 
-        return films.get(id);
+    @Override
+    public Optional<Film> getFilm(final long id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
     public Collection<Film> findAllLike(final int count) {
         List<Film> popular = new ArrayList<>();
 
-        numberOfLikes.entrySet().stream()
+        numberLikes.entrySet().stream()
                 .limit(count)
                 .forEach(integerSetEntry -> integerSetEntry.getValue()
                         .forEach(id -> popular.add(findOrElseThrow(id))));
@@ -65,75 +71,81 @@ public class InMemoryFilmStorage implements FilmStorage {
         return popular;
     }
 
-    @Override
-    public void ifEmptyThenPutInUserLikes(final long id) {
+    private void ifEmptyThenPutInFavoriteFilms(final long id) {
         if (isEmptyInUserLikes(id)) {
-            userLikes.put(id, new HashSet<>());
+            favoriteFilms.put(id, new HashSet<>());
         }
     }
 
-    @Override
-    public int getSizeUserLikes(final long id) {
-        return userLikes.get(id).size();
+    private int getSizeFavoriteFilms(final long id) {
+        return favoriteFilms.get(id).size();
     }
 
     @Override
-    public void addLikeInUserLikesOrElseThrow(final long id, final long userId) {
-        if (!userLikes.get(id).add(userId)) {
+    public void addLikeInFavoriteFilmsOrElseThrow(final long id, final long userId) {
+        ifEmptyThenPutInFavoriteFilms(id);
+        ifEmptyThenPutInNumberLikes(getSizeFavoriteFilms(id));
+        if (!favoriteFilms.get(id).add(userId)) {
             throw new ConditionsNotMetException(
                     String.format("Пользователь с id = %d уже поставил лайк фильму с id = %d", userId, id)
             );
         }
+        addLikeInNumberLikesOrElseThrow(id, userId);
+    }
+
+    private void addLikeInNumberLikesOrElseThrow(final long id, final long userId) {
+        int idLike = getSizeFavoriteFilms(id);
+        ifEmptyThenPutInNumberLikes(++idLike);
+        numberLikes.get(idLike).add(id);
+        log.info("Пользователь с id = {}, поставил лайк фильму с id = {}", userId, id);
+    }
+
+    private void transferLikesInNumberLikes(final int oldId, final int newId) {
+        numberLikes.get(newId).addAll(numberLikes.get(oldId));
+        numberLikes.get(oldId).clear();
+        numberLikes.remove(oldId);
+    }
+
+    private void removeLikeFromNumberLikes(final long id) {
+        numberLikes.get(getSizeFavoriteFilms(id)).remove(id);
     }
 
     @Override
-    public void addLikeInNumberOfLikesOrElseThrow(final int size, final long id, final long userId) {
-        numberOfLikes.get(size).add(id);
-        log.info(String.format("Пользователь с id = %d, поставил лайк фильму с id = %d", userId, id));
-    }
+    public void removeLikeFromFavoriteFilmsOrElseThrow(final long id, final long userId) {
+        int idLike = getSizeFavoriteFilms(id);
+        ifEmptyThenPutInNumberLikes(idLike);
 
-    @Override
-    public void transferLikesInInNumberOfLikes(final int size, final int oldSize) {
-        numberOfLikes.get(size).addAll(numberOfLikes.get(oldSize));
-        numberOfLikes.get(oldSize).clear();
-    }
-
-    @Override
-    public void removeLikeFromNumberOfLikes(final int size, final long id) {
-        numberOfLikes.get(size).remove(id);
-    }
-
-    @Override
-    public void removeLikeFromUserLikesOrElseThrow(final long id, final long userId) {
-        if (!userLikes.get(id).remove(userId)) {
+        if (!favoriteFilms.get(id).remove(userId)) {
             throw new ConditionsNotMetException(
                     String.format("Пользователь с id = %d не ставил лайк фильму с id = %d", userId, id)
             );
         }
 
-        log.info(String.format("Пользователь с id = %d, удалил лайк у фильма с id = %d", userId, id));
+        log.info("Пользователь с id = {}, удалил лайк у фильма с id = {}", userId, id);
+        removeLikeFromNumberLikes(id);
+        transferLikesInNumberLikes(idLike, --idLike);
     }
 
-    @Override
-    public void ifEmptyThenPutInNumberOfLikes(final int id) {
+    private void ifEmptyThenPutInNumberLikes(final int id) {
         if (isEmptyInNumberOfLikes(id)) {
-            numberOfLikes.put(id, new HashSet<>());
+            numberLikes.put(id, new HashSet<>());
         }
     }
 
     private boolean isEmptyInNumberOfLikes(final int id) {
-        return !numberOfLikes.containsKey(id);
+        return !numberLikes.containsKey(id);
     }
 
     private boolean isEmptyInUserLikes(final long id) {
-        return !userLikes.containsKey(id);
+        return !favoriteFilms.containsKey(id);
     }
 
     private boolean isEmptyInFilms(final long id) {
         return !films.containsKey(id);
     }
 
-    private boolean isDuplicated(final Film film) {
+    @Override
+    public boolean isDuplicatedName(final Film film) {
         return films.values()
                 .stream()
                 .map(Film::getName)
@@ -151,6 +163,6 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ConditionsNotMetException("Недопустимый формат Id фильма = " + currentMaxId);
         }
 
-        return  ++currentMaxId;
+        return ++currentMaxId;
     }
 }
