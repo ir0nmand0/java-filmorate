@@ -1,3 +1,3 @@
 # java-filmorate
 Template repository for Filmorate project.
-![Entity Relationship Diagram](/../src/main/resources/ERD.png)
+![Entity Relationship Diagram](/add-database/src/main/resources/ERD.png)
