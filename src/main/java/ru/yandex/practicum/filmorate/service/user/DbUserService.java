@@ -9,7 +9,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class InMemoryUserService implements UserService {
+public class DbUserService implements UserService {
     private final UserStorage userStorage;
 
     @Override

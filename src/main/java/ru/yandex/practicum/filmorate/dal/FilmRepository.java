@@ -9,10 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Genres;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Repository
@@ -66,12 +63,10 @@ public class FilmRepository extends BaseRepository<Film> {
         Set<Genre> genres = film.getGenres();
 
         if (ObjectUtils.isEmpty(genres)) {
-            final Collection<Genres> genreList = genresRepository.findById(film.getId());
+            final List<Genres> genreList = genresRepository.findById(film.getId());
 
             if (!genreList.isEmpty()) {
-                Set<Genre> genreSet = new LinkedHashSet<>();
-                genreList.forEach(genre -> genreSet.add(genreRepository.findById(genre.idGenre())));
-                film.setGenres(genreSet);
+                film.setGenres(new LinkedHashSet<>(genreRepository.findMany(genreList)));
             }
 
         } else {

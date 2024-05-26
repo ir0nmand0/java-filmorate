@@ -16,6 +16,7 @@ public class UserRepository extends BaseRepository<User> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
+    private static final String FIND_BY_TWO_ID_QUERY = "SELECT * FROM users WHERE id = ? OR id = ?";
     private static final String INSERT_QUERY = "INSERT INTO users (email, login, name, birthday) "
             + "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? "
@@ -41,6 +42,10 @@ public class UserRepository extends BaseRepository<User> {
 
     public Optional<User> findById(final long id) {
         return findOne(FIND_BY_ID_QUERY, id);
+    }
+
+    public Collection<User> findById(final long id, final long friendId) {
+        return findMany(FIND_BY_TWO_ID_QUERY, id, friendId);
     }
 
     public Collection<User> findAll() {

@@ -13,8 +13,7 @@ import java.util.Optional;
 public class FriendsRepository extends BaseRepository<Friends> {
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM friends WHERE id = ? AND friend_id = ?";
     private static final String DELETE_QUERY = "DELETE FROM friends WHERE id IN (?, ?)";
-    private static final String INSERT_QUERY = "INSERT INTO friends (id, friend_id) "
-            + "VALUES (?, ?)";
+    private static final String INSERT_QUERY = "INSERT INTO friends (id, friend_id) VALUES (?, ?)";
 
     public FriendsRepository(final JdbcTemplate jdbc, final FriendsRowMapper friendsRowMapper) {
         super(jdbc, friendsRowMapper);

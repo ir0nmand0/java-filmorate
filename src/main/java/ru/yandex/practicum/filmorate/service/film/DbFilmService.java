@@ -10,7 +10,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class InMemoryFilmService implements FilmService {
+public class DbFilmService implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 

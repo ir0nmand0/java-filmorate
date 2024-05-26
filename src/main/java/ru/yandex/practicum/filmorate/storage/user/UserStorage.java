@@ -14,6 +14,8 @@ public interface UserStorage {
 
     User findOrElseThrow(final long id);
 
+    void findOrElseThrow(final long id, final long friendId);
+
     Collection<User> findAllFriends(final long id);
 
     Collection<User> findAllCommonFriends(final long id, final long friendId);
@@ -25,4 +27,6 @@ public interface UserStorage {
     Optional<User> getUser(final long id);
 
     boolean isDuplicateEmail(final User user);
+
+    Collection<User> getUser(final long id, final long friendId);
 }

@@ -15,8 +15,8 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -30,11 +30,11 @@ public class FilmRowMapper implements RowMapper<Film> {
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
         final long id = rs.getLong("id");
         final Set<Genre> genres = new LinkedHashSet<>();
-        final Collection<Genres> genreList = genresRepository.findById(id);
+        final List<Genres> genreList = genresRepository.findById(id);
 
         if (!genreList.isEmpty()) {
             try {
-                genreList.forEach(genre -> genres.add(genreRepository.findById(genre.idGenre())));
+                genres.addAll(genreRepository.findMany(genreList));
             } catch (NotFoundException e) {
                 throw new ConditionsNotMetException(e.getMessage());
             }

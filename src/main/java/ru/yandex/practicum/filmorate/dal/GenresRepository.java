@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.dal.mapper.GenresRowMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Genres;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Repository
@@ -19,8 +19,8 @@ public class GenresRepository extends BaseRepository<Genres> {
         super(jdbc, genresRowMapper);
     }
 
-    public Collection<Genres> findById(final long id) {
-        return findMany(FIND_BY_ID_QUERY, id);
+    public List<Genres> findById(final long id) {
+        return jdbc.query(FIND_BY_ID_QUERY, mapper, id);
     }
 
     public void save(final long id, final Set<Genre> genres) {
@@ -28,6 +28,6 @@ public class GenresRepository extends BaseRepository<Genres> {
             return;
         }
 
-        genres.forEach(genre -> super.update(INSERT_QUERY, id, genre.getId()));
+        genres.forEach(genre -> update(INSERT_QUERY, id, genre.getId()));
     }
 }

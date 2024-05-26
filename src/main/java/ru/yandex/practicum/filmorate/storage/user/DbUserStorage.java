@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import ru.yandex.practicum.filmorate.dal.FriendsRepository;
@@ -17,7 +16,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
-@Primary
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -59,6 +57,21 @@ public class DbUserStorage implements UserStorage {
     }
 
     @Override
+    public void findOrElseThrow(final long id, final long friendId) {
+        final Collection<User> users = getUser(id, friendId);
+
+        if (users.size() < 2) {
+            for (final User user : users) {
+                if (user.getId() != id || user.getId() != friendId) {
+                    throw new NotFoundException(
+                            "Пользователь с id = " + (user.getId().equals(id) ? friendId : id) + " не найден"
+                    );
+                }
+            }
+        }
+    }
+
+    @Override
     public Collection<User> findAllFriends(final long id) {
         findOrElseThrow(id);
         return userRepository.findAllFriends(id);
@@ -66,15 +79,13 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public Collection<User> findAllCommonFriends(final long id, final long friendId) {
-        findOrElseThrow(id);
-        findOrElseThrow(friendId);
+        findOrElseThrow(id, friendId);
         return userRepository.findAllCommonFriends(id, friendId);
     }
 
     @Override
     public void addFriendOrElseThrow(final long id, final long friendId) {
-        findOrElseThrow(id);
-        findOrElseThrow(friendId);
+        findOrElseThrow(id, friendId);
         Optional<Friends> friends = friendsRepository.findById(id, friendId);
 
         if (friends.isEmpty()) {
@@ -94,8 +105,7 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public void removeFriendOrElseThrow(final long id, final long friendId) {
-        findOrElseThrow(id);
-        findOrElseThrow(friendId);
+        findOrElseThrow(id, friendId);
 
         if (friendsRepository.findById(id, friendId).isEmpty()) {
             throw new PostmanNotFriendRemoveException("Пользователи не друзья");
@@ -112,5 +122,10 @@ public class DbUserStorage implements UserStorage {
     @Override
     public Optional<User> getUser(final long id) {
         return userRepository.findById(id);
+    }
+
+    @Override
+    public Collection<User> getUser(final long id, final long friendId) {
+        return userRepository.findById(id, friendId);
     }
 }
